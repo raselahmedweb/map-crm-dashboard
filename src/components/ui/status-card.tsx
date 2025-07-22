@@ -1,20 +1,21 @@
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface StatusItem {
-  label: string
-  value: number
-  color: string
-  percentage: number
+  label: string;
+  value: number;
+  color: string;
+  percentage: number;
 }
 
 interface StatusCardProps {
-  title: string
-  totalLabel: string
-  totalValue: number
-  badgeText: string
-  items: StatusItem[]
-  progressHeight?: string
+  title: string;
+  totalLabel: string;
+  totalValue: number;
+  badgeText: string;
+  items: StatusItem[];
+  progressHeight?: string;
+  showChart?: boolean;
 }
 
 export function StatusCard({
@@ -38,9 +39,15 @@ export function StatusCard({
             <p className="text-3xl font-bold">{totalValue}</p>
           </div>
           <div className="space-y-3">
-            <div className={`flex ${progressHeight} overflow-hidden rounded-full bg-muted`}>
+            <div
+              className={`flex ${progressHeight} overflow-hidden rounded-full bg-muted`}
+            >
               {items.map((item, index) => (
-                <div key={index} className={item.color} style={{ width: `${item.percentage}%` }} />
+                <div
+                  key={index}
+                  className={item.color}
+                  style={{ width: `${item.percentage}%` }}
+                />
               ))}
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -60,5 +67,5 @@ export function StatusCard({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

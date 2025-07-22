@@ -1,26 +1,31 @@
-import { ChevronDown, Calendar, Home } from "lucide-react"
-import { MetricCard } from "@/components/ui/metric-card"
-import { WelcomeCard } from "@/components/ui/welcome-card"
-import { StatusCard } from "@/components/ui/status-card"
-import { DepartmentChart } from "@/components/ui/department-chart"
-import { ClockInCard } from "@/components/ui/clock-in-card"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { metricCards, departmentData, clockInData } from "@/lib/data"
+import { ChevronDown, Calendar, Home } from "lucide-react";
+import { MetricCard } from "@/components/ui/metric-card";
+import { WelcomeCard } from "@/components/ui/welcome-card";
+import { StatusCard } from "@/components/ui/status-card";
+import { DepartmentChart } from "@/components/ui/department-chart";
+import { ClockInCard } from "@/components/ui/clock-in-card";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { metricCards, departmentData, clockInData } from "@/lib/data";
 
 export default function AdminDashboard() {
   const statusItems = [
     { label: "Fulltime", value: 112, color: "bg-yellow-400", percentage: 48 },
-    { label: "Contract", value: 112, color: "bg-slate-600", percentage: 20 },
-  ]
+    { label: "Contract", value: 28, color: "bg-slate-600", percentage: 20 },
+  ];
 
   const handleAddProject = () => {
-    console.log("Add Project clicked")
-  }
+    console.log("Add Project clicked");
+  };
 
   const handleAddCompanies = () => {
-    console.log("Add Companies clicked")
-  }
+    console.log("Add Companies clicked");
+  };
 
   return (
     <div className="space-y-6">
@@ -72,7 +77,11 @@ export default function AdminDashboard() {
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {metricCards.map((card, index) => (
-          <MetricCard key={index} {...card} onActionClick={() => console.log(`${card.title} clicked`)} />
+          <MetricCard
+            key={index}
+            {...card}
+            onActionClick={() => console.log(`${card.title} clicked`)}
+          />
         ))}
       </div>
 
@@ -105,7 +114,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* Clock In/Out Section */}
-      <ClockInCard title="Clock-In/Out" subtitle="All Departments" badgeText="Today" employees={clockInData} />
+      <ClockInCard
+        title="Clock-In/Out"
+        subtitle="All Departments"
+        badgeText="Today"
+        employees={clockInData}
+      />
     </div>
-  )
+  );
 }

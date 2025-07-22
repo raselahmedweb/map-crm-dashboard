@@ -28,6 +28,8 @@ import LeaveRequests from "@/pages/LeaveRequests";
 import ClockInOut from "@/pages/ClockInOut";
 import { DashboardLayout } from "./components/dashboard-layout";
 import "./index.css";
+import Login from "./pages/login";
+import { PrivateRoute } from "./components/RouteProtect";
 
 function App() {
   return (
@@ -35,7 +37,15 @@ function App() {
       <Router>
         <DashboardLayout>
           <Routes>
-            <Route path="/" element={<AdminDashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
             <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
             <Route path="/items-dashboard" element={<ItemsDashboard />} />
             <Route path="/chat" element={<Chat />} />

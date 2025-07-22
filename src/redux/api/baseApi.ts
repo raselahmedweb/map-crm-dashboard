@@ -20,6 +20,18 @@ export const baseApi = createApi({
 
       providesTags: ["User"],
     }),
+    getMe: builder.query({
+      query: () => ({
+        url: `/auth/me`,
+        method: "GET",
+        credentials: "include",
+        headers: {
+          authoriation: Cookies.get("accessToken"),
+        },
+      }),
+
+      // providesTags: ["User"],
+    }),
 
     createUser: builder.mutation({
       query: (UserData) => ({
@@ -69,6 +81,7 @@ export const baseApi = createApi({
 
 export const {
   useGetUserQuery,
+  useGetMeQuery,
   useCreateUserMutation,
   useLoginUserMutation,
   useDeleteUserMutation,
