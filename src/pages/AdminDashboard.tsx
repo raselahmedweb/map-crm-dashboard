@@ -12,6 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { metricCards, departmentData, clockInData } from "@/lib/data";
+import { useGetMeQuery } from "@/redux/api/baseApi";
+import { useState } from "react";
+import CreateCompany from "@/components/CreateCompany";
+import InviteUser from "@/components/InviteUser";
 
 export default function AdminDashboard() {
   const statusItems = [
@@ -19,13 +23,25 @@ export default function AdminDashboard() {
     { label: "Contract", value: 28, color: "bg-slate-600", percentage: 20 },
   ];
 
-  const handleAddProject = () => {
-    console.log("Add Project clicked");
+  const [createCompanyOpen, setCreateCompanyOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  const handleInviteUser = () => {
+    setInviteOpen((p) => !p);
   };
 
   const handleAddCompanies = () => {
-    console.log("Add Companies clicked");
+    setCreateCompanyOpen((p) => !p);
   };
+
+  const { data } = useGetMeQuery(
+    {},
+    {
+      pollingInterval: 30000,
+      refetchOnMountOrArgChange: true,
+      refetchOnReconnect: true,
+    }
+  );
 
   return (
     <div className="space-y-6">
@@ -60,19 +76,35 @@ export default function AdminDashboard() {
 
       {/* Welcome Section */}
       <WelcomeCard
-        userName="Admin"
-        userAvatar="/avatar-1.jpg"
-        pendingApprovals={21}
-        leaveRequests={14}
+        userName={data?.data?.name}
+        userAvatar={data?.data?.picture}
+        pendingApprovals={0}
+        leaveRequests={0}
         primaryAction={{
-          label: "Add Project",
-          onClick: handleAddProject,
+          label: "Invite User",
+          onClick: handleInviteUser,
         }}
         secondaryAction={{
           label: "Add Companies",
           onClick: handleAddCompanies,
         }}
       />
+
+      {createCompanyOpen && (
+        <CreateCompany
+          action={{
+            onClick: handleAddCompanies,
+          }}
+        />
+      )}
+
+      {inviteOpen && (
+        <InviteUser
+          action={{
+            onClick: handleInviteUser,
+          }}
+        />
+      )}
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

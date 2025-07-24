@@ -1,5 +1,5 @@
 import { Bounce, toast } from "react-toastify";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -10,18 +10,31 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
-import { useLoginUserMutation } from "@/redux/api/baseApi";
-
-// interface ILogin {
-//     email: string,
-//     password: string
-// }
+import { useGetMeQuery, useLoginUserMutation } from "@/redux/api/baseApi";
 
 function Login() {
   const navigate = useNavigate();
   const form = useForm();
-
   const [userLogin] = useLoginUserMutation();
+  const { data, isLoading } = useGetMeQuery(
+    {},
+    {
+      pollingInterval: 30000,
+      refetchOnMountOrArgChange: true,
+      refetchOnReconnect: true,
+    }
+  );
+
+  if (isLoading) {
+    // You can customize this: loader spinner, skeleton, etc.
+    return <div>Loading...</div>;
+  }
+
+  const isAuthenticated = data?.data?.role === "ADMIN";
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const credentials = data;
@@ -38,7 +51,7 @@ function Login() {
       transition: Bounce,
     });
     form.reset();
-    navigate("/dashboard");
+    navigate("/");
   };
   return (
     <Form {...form}>

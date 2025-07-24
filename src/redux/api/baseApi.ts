@@ -6,6 +6,7 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:5000/api/v1",
+    credentials: "include",
   }),
   tagTypes: ["User"],
   endpoints: (builder) => ({
@@ -13,9 +14,6 @@ export const baseApi = createApi({
       query: () => ({
         url: `/user/all-users`,
         method: "GET",
-        headers: {
-          Authorization: `${Cookies.get("accessToken")}`,
-        },
       }),
 
       providesTags: ["User"],
@@ -24,13 +22,9 @@ export const baseApi = createApi({
       query: () => ({
         url: `/auth/me`,
         method: "GET",
-        credentials: "include",
-        headers: {
-          authoriation: Cookies.get("accessToken"),
-        },
       }),
 
-      // providesTags: ["User"],
+      providesTags: ["User"],
     }),
 
     createUser: builder.mutation({
@@ -65,6 +59,30 @@ export const baseApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    createCompany: builder.mutation({
+      query: (data) => ({
+        url: `/company/create`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    getAllCompany: builder.query({
+      query: () => ({
+        url: `/company/all-companies`,
+        method: "GET",
+      }),
+
+      providesTags: ["User"],
+    }),
+    inviteUser: builder.mutation({
+      query: (data) => ({
+        url: `/invite-user`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
     getAllMap: builder.query({
       query: () => ({
         url: `/map/all-maps`,
@@ -86,5 +104,8 @@ export const {
   useLoginUserMutation,
   useDeleteUserMutation,
   useUpdateUserMutation,
+  useCreateCompanyMutation,
+  useGetAllCompanyQuery,
+  useInviteUserMutation,
   useGetAllMapQuery,
 } = baseApi;
