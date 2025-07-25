@@ -10,6 +10,7 @@ import {
   Box,
   UserRound,
   Settings,
+  DollarSign,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,6 +68,14 @@ const navigationItems = [
       { title: "Projects", href: "/projects" },
       { title: "Floor Plan", href: "/floor-plan" },
       { title: "Completed", href: "/completed" },
+    ],
+  },
+  {
+    title: "Costs",
+    icon: DollarSign,
+    subItems: [
+      { title: "Devices", href: "/devices" },
+      { title: "Labour", href: "/labour" },
     ],
   },
   {
@@ -153,7 +162,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mb-5">
                         <ModeToggle />
                       </div>
                     </SidebarMenuButton>
