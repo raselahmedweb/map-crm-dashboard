@@ -7,125 +7,29 @@ import {
   Trash2,
   Plus,
 } from "lucide-react";
-
-// Types
-interface Employee {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  designation: string;
-  joiningDate: string;
-  status: "Active" | "Inactive";
-  avatar?: string;
-}
-
-interface StatsCard {
-  title: string;
-  count: number;
-  change: string;
-  color: string;
-  bgColor: string;
-  icon: string;
-}
-
-// Sample data
-const sampleEmployees: Employee[] = [
-  {
-    id: "Emp-001",
-    name: "Anthony Lewis",
-    email: "anthony@example.com",
-    phone: "(123) 4567 890",
-    designation: "Finance",
-    joiningDate: "12/09/2024",
-    status: "Active",
-  },
-  {
-    id: "Emp-002",
-    name: "Brian Villalobos",
-    email: "brian@example.com",
-    phone: "(179) 7382 829",
-    designation: "Developer",
-    joiningDate: "24/10/2024",
-    status: "Active",
-  },
-  {
-    id: "Emp-003",
-    name: "Harvey Smith",
-    email: "harvey@example.com",
-    phone: "(184) 2719 738",
-    designation: "Executive",
-    joiningDate: "18/02/2024",
-    status: "Active",
-  },
-  {
-    id: "Emp-004",
-    name: "Stephan Peralt",
-    email: "peral@example.com",
-    phone: "(193) 7839 748",
-    designation: "Executive",
-    joiningDate: "17/10/2024",
-    status: "Active",
-  },
-  {
-    id: "Emp-005",
-    name: "Doglas Martini",
-    email: "martiniwr@example.com",
-    phone: "(183) 9302 890",
-    designation: "Manager",
-    joiningDate: "20/07/2024",
-    status: "Active",
-  },
-  {
-    id: "Emp-006",
-    name: "Linda Ray",
-    email: "ray456@example.com",
-    phone: "(120) 3728 039",
-    designation: "Finance",
-    joiningDate: "10/04/2024",
-    status: "Active",
-  },
-  {
-    id: "Emp-007",
-    name: "Elliot Murray",
-    email: "murray@example.com",
-    phone: "(102) 8480 832",
-    designation: "Developer",
-    joiningDate: "29/08/2024",
-    status: "Active",
-  },
-  {
-    id: "Emp-008",
-    name: "Rebecca Smith",
-    email: "smith@example.com",
-    phone: "(162) 8920 713",
-    designation: "Executive",
-    joiningDate: "22/02/2024",
-    status: "Inactive",
-  },
-];
-
+import { useGetUserQuery } from "@/redux/api/baseApi";
+import type { Employee } from "@/types/types";
 const EmployeeDashboard: React.FC = () => {
-  const [employees, setEmployees] = useState<Employee[]>(sampleEmployees);
+  const { data } = useGetUserQuery(
+    {},
+    {
+      pollingInterval: 30000,
+      refetchOnMountOrArgChange: true,
+      refetchOnReconnect: true,
+    }
+  );
+  console.log(data);
+  const [employees, setEmployees] = useState<Employee[]>(data.data);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDesignation, setSelectedDesignation] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState();
   const [sortBy, setSortBy] = useState("Last 7 Days");
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Calculate stats
   const stats = useMemo(() => {
-    const total = employees.length;
-    const active = employees.filter((emp) => emp.status === "Active").length;
-    const inactive = employees.filter(
-      (emp) => emp.status === "Inactive"
-    ).length;
-    const newJoiners = employees.filter((emp) => {
-      const joinDate = new Date(emp.joiningDate.split("/").reverse().join("-"));
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      return joinDate >= sevenDaysAgo;
-    }).length;
+    const total = data.meta.total;
+    const deleted = employees.filter((emp) => emp.isDeleted === true).length;
 
     return [
       {
@@ -137,31 +41,14 @@ const EmployeeDashboard: React.FC = () => {
         icon: "👥",
       },
       {
-        title: "Active",
-        count: active,
-        change: "+19.01%",
-        color: "text-green-600",
-        bgColor: "bg-green-50",
-        icon: "✅",
-      },
-      {
-        title: "Inactive",
-        count: inactive,
-        change: "+19.01%",
+        title: "Deleted",
+        count: deleted,
         color: "text-red-600",
         bgColor: "bg-red-50",
-        icon: "❌",
-      },
-      {
-        title: "New Joiners",
-        count: newJoiners,
-        change: "+19.01%",
-        color: "text-blue-600",
-        bgColor: "bg-blue-50",
-        icon: "👋",
+        icon: "✅",
       },
     ];
-  }, [employees]);
+  }, [data.meta.total, employees]);
 
   // Filter employees
   const filteredEmployees = useMemo(() => {
@@ -170,16 +57,16 @@ const EmployeeDashboard: React.FC = () => {
         emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         emp.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesDesignation =
-        !selectedDesignation || emp.designation === selectedDesignation;
-      const matchesStatus = !selectedStatus || emp.status === selectedStatus;
+        !selectedDesignation || emp.role === selectedDesignation;
+      const matchesStatus = !selectedStatus || emp.isDeleted === selectedStatus;
 
       return matchesSearch && matchesDesignation && matchesStatus;
     });
   }, [employees, searchTerm, selectedDesignation, selectedStatus]);
 
-  // Get unique designations
+  //Get unique designations
   const designations = useMemo(() => {
-    return [...new Set(employees.map((emp) => emp.designation))];
+    return [...new Set(employees.map((emp) => emp.role))];
   }, [employees]);
 
   // Generate avatar placeholder
@@ -201,7 +88,7 @@ const EmployeeDashboard: React.FC = () => {
 
   const handleDelete = (employeeId: string) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
-      setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId));
+      setEmployees((prev) => prev.filter((emp) => emp._id !== employeeId));
     }
   };
 
@@ -341,10 +228,7 @@ const EmployeeDashboard: React.FC = () => {
                   Email
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Designation
+                  Role
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Joining Date
@@ -358,80 +242,78 @@ const EmployeeDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredEmployees.slice(0, rowsPerPage).map((employee) => (
-                <tr
-                  key={employee.id}
-                  className="hover:bg-gray-50 dark:bg-black"
-                >
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-8 h-8 rounded-full ${getAvatarColor(
-                          employee.name
-                        )} flex items-center justify-center text-white text-sm font-medium`}
-                      >
-                        {employee.name.charAt(0)}
+              {employees &&
+                employees.map((employee) => (
+                  <tr
+                    key={employee._id}
+                    className="hover:bg-gray-50 dark:bg-black"
+                  >
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-8 h-8 rounded-full ${getAvatarColor(
+                            employee.name
+                          )} flex items-center justify-center text-white text-sm font-medium`}
+                        >
+                          {employee.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {employee.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {employee.role}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {employee.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {employee.designation}
-                        </p>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-500">
+                      {employee.email}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="inline-flex items-center gap-1 text-sm text-gray-700">
+                        {employee.role}
+                        <ChevronDown size={12} />
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-500">
+                      {employee.createdAt}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          employee.isDeleted
+                            ? "bg-red-100 text-red-800"
+                            : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {employee.isDeleted ? "Deleted" : "Active"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(employee._id)}
+                          className="text-blue-600 hover:text-blue-800 p-1"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(employee._id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-500">
-                    {employee.email}
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-500">
-                    {employee.phone}
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className="inline-flex items-center gap-1 text-sm text-gray-700">
-                      {employee.designation}
-                      <ChevronDown size={12} />
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-gray-500">
-                    {employee.joiningDate}
-                  </td>
-                  <td className="px-4 py-4">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        employee.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {employee.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(employee.id)}
-                        className="text-blue-600 hover:text-blue-800 p-1"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(employee.id)}
-                        className="text-red-600 hover:text-red-800 p-1"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
-        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        {/* <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <p className="text-sm text-gray-700">
             Showing 1 to {Math.min(rowsPerPage, filteredEmployees.length)} of{" "}
             {filteredEmployees.length} entries
@@ -447,7 +329,7 @@ const EmployeeDashboard: React.FC = () => {
               Next
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
