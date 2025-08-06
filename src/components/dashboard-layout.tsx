@@ -41,7 +41,6 @@ const navigationItems = [
     subItems: [
       { title: "Admin Dashboard", href: "/" },
       { title: "Employee Dashboard", href: "/employee-dashboard" },
-      { title: "Items Dashboard", href: "/items-dashboard" },
     ],
   },
   {
@@ -66,7 +65,6 @@ const navigationItems = [
     icon: Box,
     subItems: [
       { title: "Projects", href: "/projects" },
-      { title: "Floor Plan", href: "/floor-plan" },
       { title: "Completed", href: "/completed" },
     ],
   },
@@ -137,16 +135,29 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       </SidebarMenuButton>
                       {item.subItems.length > 0 && (
                         <div className="ml-6 mt-1 space-y-1">
-                          {item.subItems.map((subItem) => (
-                            <SidebarMenuButton
-                              key={subItem.title}
-                              asChild
-                              isActive={location.pathname === subItem.href}
-                              className="text-sm"
-                            >
-                              <Link to={subItem.href}>{subItem.title}</Link>
-                            </SidebarMenuButton>
-                          ))}
+                          {item.subItems.map((subItem) => {
+                            return (
+                              <SidebarMenuButton
+                                key={subItem.title}
+                                asChild
+                                isActive={location.pathname === subItem.href}
+                                className="text-sm
+                                "
+                              >
+                                <Link to={subItem.href}>
+                                  <span
+                                    className={`${
+                                      location.pathname === subItem.href
+                                        ? "text-red-600 z-50"
+                                        : "text-muted-foreground"
+                                    }`}
+                                  >
+                                    {subItem.title}
+                                  </span>
+                                </Link>
+                              </SidebarMenuButton>
+                            );
+                          })}
                         </div>
                       )}
                     </SidebarMenuItem>

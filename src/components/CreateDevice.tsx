@@ -3,7 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useCreateItemMutation } from "@/redux/api/baseApi";
+import { useCreateDeviceMutation } from "@/redux/api/baseApi";
 import { X } from "lucide-react";
 
 export interface IProps {
@@ -12,16 +12,22 @@ export interface IProps {
   };
 }
 
-function CreateItem({ action }: IProps) {
+function CreateDevice({ action }: IProps) {
   const form = useForm();
 
-  const [createItem, { isError, error }] = useCreateItemMutation();
+  const [createDevice, { isError, error }] = useCreateDeviceMutation();
   if (isError) {
     console.log(error);
   }
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    const res = await createItem(data).unwrap();
+    const formattedData = {
+      ...data,
+      price: Number(data.price),
+      copies: Number(data.copies),
+    };
+
+    const res = await createDevice(formattedData).unwrap();
     toast.success(res.message, {
       position: "top-right",
       autoClose: 5000,
@@ -35,7 +41,7 @@ function CreateItem({ action }: IProps) {
     form.reset();
   };
   return (
-    <div className="w-full flex justify-center items-center bg-black/30 h-full fixed inset-0">
+    <div className="w-full flex justify-center items-center bg-black/30 fixed inset-0">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -48,18 +54,19 @@ function CreateItem({ action }: IProps) {
           >
             <X />
           </button>
-          <h2 className="text-xl font-bold">Create Item</h2>
+          <h2 className="text-xl font-bold">Create Device</h2>
           <FormField
             control={form.control}
-            name="name"
+            name="label"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Label</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Name"
+                    placeholder="Label"
                     {...field}
                     defaultValue={field.value || ""}
+                    required
                   />
                 </FormControl>
               </FormItem>
@@ -67,17 +74,16 @@ function CreateItem({ action }: IProps) {
           />
           <FormField
             control={form.control}
-            name="email"
+            name="shape"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Email <span className="text-sm font-thin">(optional)</span>
-                </FormLabel>
+                <FormLabel>Shape</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Email"
+                    placeholder="Shape"
                     {...field}
                     defaultValue={field.value || ""}
+                    required
                   />
                 </FormControl>
               </FormItem>
@@ -85,17 +91,17 @@ function CreateItem({ action }: IProps) {
           />
           <FormField
             control={form.control}
-            name="website"
+            name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Website <span className="text-sm font-thin">(optional)</span>
-                </FormLabel>
+                <FormLabel>Price</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Website"
+                    type="number"
+                    placeholder="Price"
                     {...field}
                     defaultValue={field.value || ""}
+                    required
                   />
                 </FormControl>
               </FormItem>
@@ -103,27 +109,27 @@ function CreateItem({ action }: IProps) {
           />
           <FormField
             control={form.control}
-            name="logo"
+            name="copies"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Logo <span className="text-sm font-thin">(optional)</span>
-                </FormLabel>
+                <FormLabel>Copies</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Logo"
+                    type="number"
+                    placeholder="copies"
                     {...field}
                     defaultValue={field.value || ""}
+                    required
                   />
                 </FormControl>
               </FormItem>
             )}
           />
-          <Button type="submit">Create Item</Button>
+          <Button type="submit">Create Device</Button>
         </form>
       </Form>
     </div>
   );
 }
 
-export default CreateItem;
+export default CreateDevice;

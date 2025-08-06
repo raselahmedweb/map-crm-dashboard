@@ -1,5 +1,5 @@
-import Cookies from "js-cookie";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { IProjects } from "@/types/types";
 
 // Define a service using a base URL and expected endpoints
 export const baseApi = createApi({
@@ -83,15 +83,82 @@ export const baseApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    createMap: builder.mutation({
+      query: (data) => ({
+        url: `/map/create`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
     getAllMap: builder.query({
       query: () => ({
         url: `/map/all-maps`,
         method: "GET",
-        headers: {
-          Authorization: `${Cookies.get("accessToken")}`,
-        },
       }),
 
+      providesTags: ["User"],
+    }),
+    deleteMap: builder.mutation({
+      query: (id) => ({
+        url: `/map/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    createProjects: builder.mutation({
+      query: (data) => ({
+        url: `/projects/create`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    getProjects: builder.query({
+      query: () => ({
+        url: `/projects/all-projects`,
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+    getSingleProject: builder.query({
+      query: (id: string) => ({
+        url: `/projects/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+    updateProjects: builder.mutation<
+      IProjects,
+      { data: IProjects; id: string }
+    >({
+      query: ({ data, id }) => ({
+        url: `/projects/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
+    createDevice: builder.mutation({
+      query: (data) => ({
+        url: `/item/create`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    getDevices: builder.query({
+      query: () => ({
+        url: `/item/all-items`,
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+    getDevicesWithDetails: builder.query({
+      query: () => ({
+        url: `/item/all-items-with-details`,
+        method: "GET",
+      }),
       providesTags: ["User"],
     }),
   }),
@@ -107,5 +174,14 @@ export const {
   useCreateCompanyMutation,
   useGetAllCompanyQuery,
   useInviteUserMutation,
+  useCreateMapMutation,
   useGetAllMapQuery,
+  useDeleteMapMutation,
+  useCreateProjectsMutation,
+  useGetProjectsQuery,
+  useGetSingleProjectQuery,
+  useUpdateProjectsMutation,
+  useCreateDeviceMutation,
+  useGetDevicesQuery,
+  useGetDevicesWithDetailsQuery,
 } = baseApi;
