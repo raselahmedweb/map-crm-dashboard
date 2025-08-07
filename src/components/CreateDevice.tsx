@@ -91,6 +91,24 @@ function CreateDevice({ action }: IProps) {
           />
           <FormField
             control={form.control}
+            name="color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Color</FormLabel>
+                <FormControl>
+                  <input
+                    type="color"
+                    {...field}
+                    className="w-full h-10 rounded border border-gray-300 p-1"
+                    required
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="price"
             render={({ field }) => (
               <FormItem>

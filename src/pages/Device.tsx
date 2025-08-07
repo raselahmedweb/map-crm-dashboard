@@ -10,7 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useGetDevicesWithDetailsQuery } from "@/redux/api/baseApi";
+import {
+  useDeleteDeviceMutation,
+  useGetDevicesWithDetailsQuery,
+} from "@/redux/api/baseApi";
 import { Building2, Loader2 } from "lucide-react";
 import type { IDevice } from "@/types/types";
 import CreateDevice from "@/components/CreateDevice";
@@ -26,6 +29,9 @@ export default function Device() {
       refetchOnReconnect: true,
     }
   );
+
+  const [deleteDevice] = useDeleteDeviceMutation();
+
   const devices: IDevice[] = deviceData?.data?.item || [];
   if (isLoading) {
     return (
@@ -66,6 +72,7 @@ export default function Device() {
                   <TableRow className="divide-x divide-y">
                     <TableHead>Label</TableHead>
                     <TableHead>Shape</TableHead>
+                    <TableHead>Color</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Copies</TableHead>
                     <TableHead>Actions</TableHead>
@@ -88,6 +95,12 @@ export default function Device() {
                         </TableCell>
 
                         <TableCell>
+                          <div className="w-4 h-4">
+                            <p className="max-w-xs truncate">{device.color}</p>
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
                           <div>
                             <p className="max-w-xs truncate">{device.price}</p>
                           </div>
@@ -101,7 +114,11 @@ export default function Device() {
 
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <Button size="sm" variant="destructive">
+                            <Button
+                              onClick={() => deleteDevice(device._id)}
+                              size="sm"
+                              variant="destructive"
+                            >
                               Delete
                             </Button>
                           </div>

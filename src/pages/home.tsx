@@ -1,5 +1,3 @@
-"use client";
-
 import { ChevronDown, Calendar, Home } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { MetricCard } from "@/components/ui/metric-card";

@@ -20,6 +20,7 @@ import { ToastContainer } from "react-toastify";
 import NotFound from "./pages/not-found";
 import Device from "./pages/Device";
 import ProjectDetails from "./pages/ProjectDetails";
+import ProjectDesign from "./pages/ProjectDesign";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
                     <Route path="/clients" element={<Clients />} />
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/projects/:id" element={<ProjectDetails />} />
+                    <Route path="/map/:mapId" element={<ProjectDesign />} />
                     <Route path="/completed" element={<Completed />} />
                     <Route path="/leave-requests" element={<LeaveRequests />} />
                     <Route path="/clock-in-out" element={<ClockInOut />} />

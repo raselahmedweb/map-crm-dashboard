@@ -99,6 +99,14 @@ export const baseApi = createApi({
 
       providesTags: ["User"],
     }),
+    getSingleMap: builder.query({
+      query: (id: string) => ({
+        url: `/map/single/${id}`,
+        method: "GET",
+      }),
+
+      providesTags: ["User"],
+    }),
     deleteMap: builder.mutation({
       query: (id) => ({
         url: `/map/${id}`,
@@ -161,6 +169,43 @@ export const baseApi = createApi({
       }),
       providesTags: ["User"],
     }),
+    deleteDevice: builder.mutation({
+      query: (id) => ({
+        url: `/item/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
+    createItemOnMap: builder.mutation({
+      query: (data) => ({
+        url: `/item-on-map/create`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    changePositionOfItems: builder.mutation({
+      query: (data) => ({
+        url: `/item-on-map/change-position/${data.id}`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
+    getItemOnMap: builder.query({
+      query: (id: string) => ({
+        url: `/item-on-map/all-items-on-map/${id}`,
+        method: "GET",
+      }),
+
+      providesTags: ["User"],
+    }),
+    deleteItemFromMap: builder.mutation({
+      query: (id) => ({
+        url: `/item-on-map/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -176,6 +221,7 @@ export const {
   useInviteUserMutation,
   useCreateMapMutation,
   useGetAllMapQuery,
+  useGetSingleMapQuery,
   useDeleteMapMutation,
   useCreateProjectsMutation,
   useGetProjectsQuery,
@@ -184,4 +230,9 @@ export const {
   useCreateDeviceMutation,
   useGetDevicesQuery,
   useGetDevicesWithDetailsQuery,
+  useDeleteDeviceMutation,
+  useCreateItemOnMapMutation,
+  useChangePositionOfItemsMutation,
+  useGetItemOnMapQuery,
+  useDeleteItemFromMapMutation,
 } = baseApi;

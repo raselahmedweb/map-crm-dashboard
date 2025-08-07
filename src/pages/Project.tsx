@@ -111,7 +111,6 @@ export default function Projects() {
                     <TableHead>Project</TableHead>
                     <TableHead>Creator</TableHead>
                     <TableHead>Company</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -172,16 +171,6 @@ export default function Projects() {
                                 {project.companyId?.name || "N/A"}
                               </p>
                             </div>
-                          </div>
-                        </TableCell>
-
-                        <TableCell>
-                          <div>
-                            <span className="text-sm">
-                              {project.isMapCreated
-                                ? "Map Created"
-                                : "Map Not Created"}
-                            </span>
                           </div>
                         </TableCell>
 

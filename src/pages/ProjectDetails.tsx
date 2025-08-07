@@ -30,14 +30,21 @@ import {
 import type { IMap } from "@/types/types";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Trash2, Play, Plus, ArrowLeft, Users, Palette } from "lucide-react";
+import {
+  Trash2,
+  Play,
+  Plus,
+  ArrowLeft,
+  Users,
+  Palette,
+  Pen,
+} from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function ProjectDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [showMapForm, setShowMapForm] = useState(false);
-  const [deleteMapId, setDeleteMapId] = useState<string | null>(null);
 
   // API hooks
   const { data: project, isLoading: projectLoading } = useGetSingleProjectQuery(
@@ -75,17 +82,13 @@ export default function ProjectDetails() {
     } catch (error) {
       toast.error("Failed to delete map");
       console.error("Delete map error:", error);
-    } finally {
-      setDeleteMapId(null);
     }
   };
 
   const handleStartDesign = (mapId: string) => {
-    // Navigate to map design page
     navigate(`/maps/${mapId}/design`);
   };
 
-  // Extract maps from the response structure based on your console log
   const maps: IMap[] = mapData?.data?.map || [];
 
   if (projectLoading) {
@@ -98,13 +101,15 @@ export default function ProjectDetails() {
 
   return (
     <div className="container mx-auto space-y-6">
-      {/* Project Header */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-3xl font-bold text-gray-900">
-                {project?.data?.name}
+              <CardTitle className="text-3xl font-bold">
+                {project?.data?.name}{" "}
+                <span className="text-gray-500 text-lg">
+                  {project?.data?.companyId?.name}
+                </span>
               </CardTitle>
               <p className="text-sm text-gray-500 mt-1">
                 Project ID: {project?.data?._id}
@@ -148,7 +153,6 @@ export default function ProjectDetails() {
         )}
       </Card>
 
-      {/* Maps Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -175,9 +179,9 @@ export default function ProjectDetails() {
               </Button>
             </div>
           ) : (
-            <Table>
+            <Table className="border">
               <TableHeader>
-                <TableRow>
+                <TableRow className="divide-x divide-y">
                   <TableHead>Map Name</TableHead>
                   <TableHead>Designer</TableHead>
                   <TableHead>Assigned To</TableHead>
@@ -189,7 +193,7 @@ export default function ProjectDetails() {
               </TableHeader>
               <TableBody>
                 {maps.map((map) => (
-                  <TableRow key={map._id} className="hover:bg-gray-50">
+                  <TableRow key={map._id} className="divide-x divide-y">
                     <TableCell className="font-medium">{map.name}</TableCell>
 
                     <TableCell>
@@ -262,10 +266,16 @@ export default function ProjectDetails() {
                         <Button
                           size="sm"
                           onClick={() => handleStartDesign(map._id)}
+                          className="flex bg-blue-400 items-center gap-1"
+                        >
+                          <Pen className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => navigate(`/map/${map._id}`)}
                           className="flex items-center gap-1"
                         >
                           <Play className="h-3 w-3" />
-                          Design
                         </Button>
 
                         <AlertDialog>
@@ -276,7 +286,6 @@ export default function ProjectDetails() {
                               className="flex items-center gap-1"
                             >
                               <Trash2 className="h-3 w-3" />
-                              Delete
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -311,8 +320,8 @@ export default function ProjectDetails() {
 
       {/* Create Map Form Modal/Overlay */}
       {showMapForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/10 bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <CreateMapForm
               onSubmit={handleMapSubmit}
               onCancel={() => setShowMapForm(false)}

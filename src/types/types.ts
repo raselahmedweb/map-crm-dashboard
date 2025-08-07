@@ -44,6 +44,30 @@ export interface IProjects {
   createdAt: string;
 }
 
+export interface IItem {
+  _id?: string;
+  label: string;
+  shape: string;
+  price: number;
+  copies: number;
+}
+
+export interface IItemOnMap {
+  _id?: string;
+  itemId: string;
+  mapId: string;
+  userId: string;
+  salePrice?: number;
+  progress?: number;
+  notes?: string;
+  serial?: string;
+  mac?: string;
+  model?: string;
+  location?: string;
+  x: number;
+  y: number;
+}
+
 export interface IMap {
   _id?: string;
   name: string;
@@ -69,6 +93,7 @@ export interface IDevice {
   _id?: string;
   label: string;
   shape: string;
+  color: string;
   price: number;
   copies: number;
   createdAt?: string;

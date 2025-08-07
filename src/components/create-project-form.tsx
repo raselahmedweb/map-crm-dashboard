@@ -266,7 +266,7 @@ export default function CreateProjectForm({
 
   return (
     <div className="fixed inset-0 bg-black/10 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-gray-50 dark:bg-black rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">Create Project</h2>
           <button
@@ -336,16 +336,16 @@ export default function CreateProjectForm({
             />
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2">
                 Project Images
               </label>
 
               {/* Upload Area */}
-              <div className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors rounded-lg p-6">
+              <div className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors rounded-lg">
                 <div className="text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="mt-4">
+                  <div className="py-4">
                     <label htmlFor="images" className="cursor-pointer">
+                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
                       <span className="mt-2 block text-sm font-medium text-gray-900">
                         Upload Project images
                       </span>

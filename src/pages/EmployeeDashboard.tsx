@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Calendar,
@@ -10,7 +10,7 @@ import {
 import { useGetUserQuery } from "@/redux/api/baseApi";
 import type { Employee } from "@/types/types";
 const EmployeeDashboard: React.FC = () => {
-  const { data } = useGetUserQuery(
+  const { data, isLoading } = useGetUserQuery(
     {},
     {
       pollingInterval: 30000,
@@ -18,8 +18,8 @@ const EmployeeDashboard: React.FC = () => {
       refetchOnReconnect: true,
     }
   );
-  console.log(data);
-  const [employees, setEmployees] = useState<Employee[]>(data.data);
+
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDesignation, setSelectedDesignation] = useState("");
   const [selectedStatus, setSelectedStatus] = useState();
@@ -28,7 +28,7 @@ const EmployeeDashboard: React.FC = () => {
 
   // Calculate stats
   const stats = useMemo(() => {
-    const total = data.meta.total;
+    const total = data?.meta?.total;
     const deleted = employees.filter((emp) => emp.isDeleted === true).length;
 
     return [
@@ -48,7 +48,13 @@ const EmployeeDashboard: React.FC = () => {
         icon: "✅",
       },
     ];
-  }, [data.meta.total, employees]);
+  }, [data?.meta?.total, employees]);
+
+  useEffect(() => {
+    if (data?.data && Array.isArray(data?.data)) {
+      setEmployees(data?.data);
+    }
+  }, [data]);
 
   // Filter employees
   const filteredEmployees = useMemo(() => {
@@ -92,6 +98,9 @@ const EmployeeDashboard: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className="min-h-screen">
       {/* Header */}
