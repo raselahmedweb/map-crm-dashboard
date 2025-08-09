@@ -59,17 +59,17 @@ export const baseApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    createCompany: builder.mutation({
+    createCustomer: builder.mutation({
       query: (data) => ({
-        url: `/company/create`,
+        url: `/customer/create`,
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["User"],
     }),
-    getAllCompany: builder.query({
+    getAllCustomer: builder.query({
       query: () => ({
-        url: `/company/all-companies`,
+        url: `/customer/all-customers`,
         method: "GET",
       }),
 
@@ -216,8 +216,8 @@ export const {
   useLoginUserMutation,
   useDeleteUserMutation,
   useUpdateUserMutation,
-  useCreateCompanyMutation,
-  useGetAllCompanyQuery,
+  useCreateCustomerMutation,
+  useGetAllCustomerQuery,
   useInviteUserMutation,
   useCreateMapMutation,
   useGetAllMapQuery,

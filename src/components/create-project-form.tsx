@@ -16,7 +16,7 @@ import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
 import { Upload, X, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import {
   useCreateProjectsMutation,
-  useGetAllCompanyQuery,
+  useGetAllCustomerQuery,
 } from "@/redux/api/baseApi";
 import type { ICompany } from "@/types/types";
 import {
@@ -75,7 +75,7 @@ export default function CreateProjectForm({
 }: ProjectFormProps) {
   const [createProject, { isLoading: isCreatingProject }] =
     useCreateProjectsMutation();
-  const { data } = useGetAllCompanyQuery(
+  const { data } = useGetAllCustomerQuery(
     {},
     {
       pollingInterval: 30000,

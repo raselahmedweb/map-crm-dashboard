@@ -14,7 +14,7 @@ import {
 import { metricCards, departmentData, clockInData } from "@/lib/data";
 import { useGetMeQuery } from "@/redux/api/baseApi";
 import { useState } from "react";
-import CreateCompany from "@/components/CreateCompany";
+import CreateCustomer from "@/components/CreateCustomer";
 import InviteUser from "@/components/InviteUser";
 
 export default function AdminDashboard() {
@@ -85,13 +85,13 @@ export default function AdminDashboard() {
           onClick: handleInviteUser,
         }}
         secondaryAction={{
-          label: "Add Companies",
+          label: "Add Customer",
           onClick: handleAddCompanies,
         }}
       />
 
       {createCompanyOpen && (
-        <CreateCompany
+        <CreateCustomer
           action={{
             onClick: handleAddCompanies,
           }}

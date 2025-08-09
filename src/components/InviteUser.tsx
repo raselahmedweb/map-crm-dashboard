@@ -1,10 +1,10 @@
 import {
-  useGetAllCompanyQuery,
+  useGetAllCustomerQuery,
   useInviteUserMutation,
 } from "@/redux/api/baseApi";
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
 import { Bounce, toast } from "react-toastify";
-import type { IProps } from "./CreateCompany";
+import type { IProps } from "./CreateCustomer";
 import { X } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { Input } from "./ui/input";
@@ -30,10 +30,11 @@ export const Role = [
   "CUSTOMER",
 ];
 
-export interface ICompany {
+export interface ICustomer {
   _id: string;
   name: string;
   email: string;
+  role: string;
 }
 
 function InviteUser({ action }: IProps) {
@@ -83,7 +84,7 @@ function InviteUser({ action }: IProps) {
     form.reset();
   };
 
-  const { data } = useGetAllCompanyQuery(
+  const { data } = useGetAllCustomerQuery(
     {},
     {
       pollingInterval: 30000,
@@ -92,7 +93,8 @@ function InviteUser({ action }: IProps) {
     }
   );
 
-  const company: ICompany[] = data?.data?.company;
+  let customer: ICustomer[] = data?.data?.customer || [];
+  customer = customer.filter((c) => c.role === "company");
   return (
     <div className="w-full flex justify-center items-center bg-black/30 h-full fixed inset-0">
       <Form {...form}>
@@ -168,8 +170,8 @@ function InviteUser({ action }: IProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {company &&
-                      company.map((com, idx) => (
+                    {customer &&
+                      customer.map((com, idx) => (
                         <SelectItem key={idx} value={com._id}>
                           {com.name}
                         </SelectItem>

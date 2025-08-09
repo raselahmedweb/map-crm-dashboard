@@ -3,8 +3,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useCreateCompanyMutation } from "@/redux/api/baseApi";
+import { useCreateCustomerMutation } from "@/redux/api/baseApi";
 import { X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 export interface IProps {
   action: {
@@ -12,16 +19,19 @@ export interface IProps {
   };
 }
 
-function CreateCompany({ action }: IProps) {
+// eslint-disable-next-line react-refresh/only-export-components
+export const Role = ["company", "person"];
+
+function CreateCustomer({ action }: IProps) {
   const form = useForm();
 
-  const [createCompany, { isError, error }] = useCreateCompanyMutation();
+  const [createCustomer, { isError, error }] = useCreateCustomerMutation();
   if (isError) {
     console.log(error);
   }
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    const res = await createCompany(data).unwrap();
+    const res = await createCustomer(data).unwrap();
     toast.success(res.message, {
       position: "top-right",
       autoClose: 5000,
@@ -48,7 +58,7 @@ function CreateCompany({ action }: IProps) {
           >
             <X />
           </button>
-          <h2 className="text-xl font-bold">Create Company</h2>
+          <h2 className="text-xl font-bold">Create Customer</h2>
           <FormField
             control={form.control}
             name="name"
@@ -80,6 +90,33 @@ function CreateCompany({ action }: IProps) {
                     defaultValue={field.value || ""}
                   />
                 </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Role</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  defaultValue={field.value || ""}
+                >
+                  <FormControl className="w-full">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Role.map((role, idx) => (
+                      <SelectItem key={idx} value={role}>
+                        {role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormItem>
             )}
           />
@@ -119,11 +156,11 @@ function CreateCompany({ action }: IProps) {
               </FormItem>
             )}
           />
-          <Button type="submit">Create company</Button>
+          <Button type="submit">Create Customer</Button>
         </form>
       </Form>
     </div>
   );
 }
 
-export default CreateCompany;
+export default CreateCustomer;
