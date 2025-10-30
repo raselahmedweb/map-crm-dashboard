@@ -1,17 +1,31 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { format } from "date-fns";
+import { Search, Trash2, AlertTriangle, X } from "lucide-react";
 import {
-  Search,
-  Calendar,
-  ChevronDown,
-  Edit,
-  Trash2,
-  Plus,
-} from "lucide-react";
-import { useGetUserQuery } from "@/redux/api/baseApi";
+  useGetUserQuery,
+  useUpdateUserByAdminMutation,
+} from "@/redux/api/baseApi";
 import type { Employee } from "@/types/types";
+
+const UserRoles: string[] = [
+  "ADMIN",
+  "ASSISTANT",
+  "SALES_TECHNICIAN",
+  "SALES_SPECIALIST",
+  "PROJECT_DESIGNER",
+  "COLLABORATOR",
+  "INSTALLER",
+  "TECHNICIAN",
+  "CUSTOMER",
+];
 const EmployeeDashboard: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDesignation, setSelectedDesignation] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [editingEmployeeId, setEditingEmployeeId] = useState<string>("");
+
   const { data, isLoading } = useGetUserQuery(
-    {},
+    { name: searchTerm, designation: selectedDesignation },
     {
       pollingInterval: 30000,
       refetchOnMountOrArgChange: true,
@@ -19,12 +33,9 @@ const EmployeeDashboard: React.FC = () => {
     }
   );
 
+  const [updateUser] = useUpdateUserByAdminMutation();
+
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDesignation, setSelectedDesignation] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState();
-  const [sortBy, setSortBy] = useState("Last 7 Days");
-  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -35,7 +46,6 @@ const EmployeeDashboard: React.FC = () => {
       {
         title: "Total Employee",
         count: total,
-        change: "+19.01%",
         color: "text-gray-600",
         bgColor: "bg-gray-50 dark:bg-black",
         icon: "👥",
@@ -53,27 +63,40 @@ const EmployeeDashboard: React.FC = () => {
   useEffect(() => {
     if (data?.data && Array.isArray(data?.data)) {
       setEmployees(data?.data);
+      // console.log(data?.data);
     }
   }, [data]);
 
-  // Filter employees
-  const filteredEmployees = useMemo(() => {
-    return employees.filter((emp) => {
-      const matchesSearch =
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.email.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesDesignation =
-        !selectedDesignation || emp.role === selectedDesignation;
-      const matchesStatus = !selectedStatus || emp.isDeleted === selectedStatus;
+  // Export to csv
 
-      return matchesSearch && matchesDesignation && matchesStatus;
-    });
-  }, [employees, searchTerm, selectedDesignation, selectedStatus]);
+  const exportToCSV = () => {
+    if (employees.length === 0) return alert("No data to export!");
 
-  //Get unique designations
-  const designations = useMemo(() => {
-    return [...new Set(employees.map((emp) => emp.role))];
-  }, [employees]);
+    const headers = Object.keys(employees[0]);
+    const csvRows = [headers.join(",")];
+
+    for (const user of employees) {
+      const values = headers.map((header) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const value = (user as any)[header];
+        // handle commas, quotes, newlines safely
+        const escaped =
+          value === undefined || value === null
+            ? ""
+            : `"${String(value).replace(/"/g, '""')}"`;
+        return escaped;
+      });
+      csvRows.push(values.join(","));
+    }
+
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "users.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   // Generate avatar placeholder
   const getAvatarColor = (name: string): string => {
@@ -89,13 +112,13 @@ const EmployeeDashboard: React.FC = () => {
   };
 
   const handleEdit = (employeeId: string) => {
-    console.log("Edit employee:", employeeId);
+    setIsOpen(true);
+    setEditingEmployeeId(employeeId);
   };
 
-  const handleDelete = (employeeId: string) => {
-    if (window.confirm("Are you sure you want to delete this employee?")) {
-      setEmployees((prev) => prev.filter((emp) => emp._id !== employeeId));
-    }
+  const handleDelete = () => {
+    updateUser({ _id: editingEmployeeId, isDeleted: true });
+    // setEmployees((prev) => prev.filter((emp) => emp._id !== editingEmployeeId));
   };
 
   if (isLoading) {
@@ -112,11 +135,11 @@ const EmployeeDashboard: React.FC = () => {
           </nav>
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:bg-black">
-            📊 Export <ChevronDown size={16} />
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
-            <Plus size={16} /> Add Employee
+          <button
+            onClick={exportToCSV}
+            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:bg-black"
+          >
+            📊 Export
           </button>
         </div>
       </div>
@@ -140,55 +163,26 @@ const EmployeeDashboard: React.FC = () => {
                   <p className="text-2xl font-bold">{stat.count}</p>
                 </div>
               </div>
-              <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
-                {stat.change}
-              </span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="bg-card rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-4">
-        <div className="flex flex-wrap gap-4 items-center justify-between">
+      {/* Table */}
+      <div className="bg-card rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="flex  p-4 flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4 items-center">
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar size={16} />
-              <span>07/16/2025 - 07/22/2025</span>
-              <ChevronDown size={16} />
-            </div>
-
             <select
               value={selectedDesignation}
               onChange={(e) => setSelectedDesignation(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm"
             >
               <option value="">Designation</option>
-              {designations.map((designation) => (
+              {UserRoles.map((designation) => (
                 <option key={designation} value={designation}>
                   {designation}
                 </option>
               ))}
-            </select>
-
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="">Select Status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="Last 7 Days">Sort By: Last 7 Days</option>
-              <option value="Last 30 Days">Last 30 Days</option>
-              <option value="Last 90 Days">Last 90 Days</option>
             </select>
           </div>
 
@@ -206,25 +200,6 @@ const EmployeeDashboard: React.FC = () => {
             />
           </div>
         </div>
-      </div>
-
-      {/* Table */}
-      <div className="bg-card rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 text-sm">
-            <span>Row Per Page</span>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => setRowsPerPage(Number(e.target.value))}
-              className="px-2 py-1 border border-gray-300 rounded"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-            </select>
-            <span>Entries</span>
-          </div>
-        </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -235,9 +210,6 @@ const EmployeeDashboard: React.FC = () => {
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Joining Date
@@ -279,14 +251,9 @@ const EmployeeDashboard: React.FC = () => {
                     <td className="px-4 py-4 text-sm text-gray-500">
                       {employee.email}
                     </td>
-                    <td className="px-4 py-4">
-                      <span className="inline-flex items-center gap-1 text-sm text-gray-700">
-                        {employee.role}
-                        <ChevronDown size={12} />
-                      </span>
-                    </td>
+
                     <td className="px-4 py-4 text-sm text-gray-500">
-                      {employee.createdAt}
+                      {format(new Date(employee.createdAt), "MMMM d, yyyy")}
                     </td>
                     <td className="px-4 py-4">
                       <span
@@ -303,12 +270,6 @@ const EmployeeDashboard: React.FC = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(employee._id)}
-                          className="text-blue-600 hover:text-blue-800 p-1"
-                        >
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(employee._id)}
                           className="text-red-600 hover:text-red-800 p-1"
                         >
                           <Trash2 size={16} />
@@ -340,6 +301,56 @@ const EmployeeDashboard: React.FC = () => {
           </div>
         </div> */}
       </div>
+
+      {/* Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/10 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          {/* Modal Content */}
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative animate-scale-in">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="text-red-600" size={32} />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">
+              Delete Confirmation
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-600 text-center mb-6">
+              Are you sure you want to delete this?
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Trash2 size={18} />
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -34,13 +34,21 @@ export interface Employee {
   createdAt: string;
 }
 
+interface UserInfo {
+  name: string;
+}
+
+interface CustomerInfo {
+  name: string;
+}
+
 export interface IProjects {
   _id?: string;
-  userId: string;
-  companyId?: string;
-  imageUrl: string[];
+  userId: UserInfo;
+  customerId?: CustomerInfo;
   name: string;
-  isMapCreated: boolean;
+  isSystemCreated: boolean;
+  isDeleted: boolean;
   createdAt: string;
 }
 

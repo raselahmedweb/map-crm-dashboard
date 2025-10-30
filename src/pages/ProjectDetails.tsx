@@ -22,10 +22,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  useGetAllMapQuery,
   useGetMeQuery,
   useGetSingleProjectQuery,
   useDeleteMapMutation,
+  useGetProjectMapQuery,
 } from "@/redux/api/baseApi";
 import type { IMap } from "@/types/types";
 import { useState } from "react";
@@ -38,6 +38,12 @@ import {
   Users,
   Palette,
   Pen,
+  Cpu,
+  DollarSign,
+  Map,
+  Eye,
+  Edit,
+  MoreHorizontal,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -45,6 +51,11 @@ export default function ProjectDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [showMapForm, setShowMapForm] = useState(false);
+  const [activeTab, setActiveTab] = useState("maps");
+
+  const showMapHandler = () => {
+    setShowMapForm((p) => !p);
+  };
 
   // API hooks
   const { data: project, isLoading: projectLoading } = useGetSingleProjectQuery(
@@ -58,15 +69,15 @@ export default function ProjectDetails() {
       refetchOnReconnect: true,
     }
   );
-  const { data: mapData, refetch: refetchMaps } = useGetAllMapQuery(
-    {},
+  const { data: mapData, refetch: refetchMaps } = useGetProjectMapQuery(
+    id as string,
     {
       pollingInterval: 30000,
       refetchOnMountOrArgChange: true,
       refetchOnReconnect: true,
     }
   );
-  const [deleteMap, { isLoading: isDeleting }] = useDeleteMapMutation();
+  const [deleteMap] = useDeleteMapMutation();
 
   const handleMapSubmit = () => {
     setShowMapForm(false);
@@ -89,7 +100,70 @@ export default function ProjectDetails() {
     navigate(`/maps/${mapId}/design`);
   };
 
-  const maps: IMap[] = mapData?.data?.map || [];
+  console.log(mapData);
+
+  const maps: IMap[] = mapData?.map || [];
+
+  // Sample data for demonstration
+  const devices = [
+    {
+      id: 1,
+      name: "Drone A1",
+      type: "Aerial",
+      status: "Active",
+      lastMaintenance: "2023-10-15",
+    },
+    {
+      id: 2,
+      name: "Sensor S2",
+      type: "Ground",
+      status: "Inactive",
+      lastMaintenance: "2023-09-22",
+    },
+    {
+      id: 3,
+      name: "GPS Unit",
+      type: "Navigation",
+      status: "Maintenance",
+      lastMaintenance: "2023-11-05",
+    },
+  ];
+
+  const labours = [
+    {
+      id: 1,
+      name: "John Smith",
+      role: "Surveyor",
+      hours: 40,
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Emma Johnson",
+      role: "Technician",
+      hours: 35,
+      status: "Active",
+    },
+    {
+      id: 3,
+      name: "Michael Brown",
+      role: "Operator",
+      hours: 20,
+      status: "On Leave",
+    },
+  ];
+
+  const finances = [
+    {
+      id: 1,
+      category: "Equipment",
+      budget: 15000,
+      spent: 12000,
+      remaining: 3000,
+    },
+    { id: 2, category: "Labor", budget: 25000, spent: 18000, remaining: 7000 },
+    { id: 3, category: "Software", budget: 5000, spent: 4500, remaining: 500 },
+  ];
 
   if (projectLoading) {
     return (
@@ -98,6 +172,318 @@ export default function ProjectDetails() {
       </div>
     );
   }
+
+  // Navigation tabs data
+  const tabs = [
+    {
+      id: "maps",
+      title: "Maps",
+    },
+    {
+      id: "devices",
+      title: "Devices",
+    },
+    {
+      id: "labours",
+      title: "Labours",
+    },
+    {
+      id: "finance",
+      title: "Finance",
+    },
+  ];
+
+  const renderTable = () => {
+    switch (activeTab) {
+      case "maps":
+        return (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Project Maps</h3>
+              <Button
+                onClick={() => setShowMapForm(true)}
+                className="flex items-center gap-2"
+                size="sm"
+              >
+                <Plus className="h-4 w-4" />
+                Create Map
+              </Button>
+            </div>
+            {maps.length !== 0 ? (
+              <div className="text-center py-8 border rounded-md">
+                <Map className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-4 text-lg font-medium">No maps yet</h3>
+                <p className="text-sm text-muted-foreground">
+                  Get started by creating your first map.
+                </p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created At</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {maps.map((map) => (
+                    <TableRow key={map._id}>
+                      <TableCell className="font-medium">{map.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">Active</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(map.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleStartDesign(map._id)}
+                            className="flex items-center gap-1"
+                          >
+                            <Palette className="h-4 w-4" />
+                            Design
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="flex items-center gap-1"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete the map and remove all
+                                  associated data.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteMap(map._id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </>
+        );
+
+      case "devices":
+        return (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Project Devices</h3>
+              <Button className="flex items-center gap-2" size="sm">
+                <Plus className="h-4 w-4" />
+                Add Device
+              </Button>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Last Maintenance</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {devices.map((device) => (
+                  <TableRow key={device.id}>
+                    <TableCell className="font-medium">{device.name}</TableCell>
+                    <TableCell>{device.type}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={
+                          device.status === "Active"
+                            ? "bg-green-100 text-green-800"
+                            : device.status === "Maintenance"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                        }
+                      >
+                        {device.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{device.lastMaintenance}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </>
+        );
+
+      case "labours":
+        return (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Project Labours</h3>
+              <Button className="flex items-center gap-2" size="sm">
+                <Plus className="h-4 w-4" />
+                Add Labour
+              </Button>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Hours</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {labours.map((labour) => (
+                  <TableRow key={labour.id}>
+                    <TableCell className="font-medium">{labour.name}</TableCell>
+                    <TableCell>{labour.role}</TableCell>
+                    <TableCell>{labour.hours}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={
+                          labour.status === "Active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }
+                      >
+                        {labour.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </>
+        );
+
+      case "finance":
+        return (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium">Project Finance</h3>
+              <Button className="flex items-center gap-2" size="sm">
+                <Plus className="h-4 w-4" />
+                Add Budget
+              </Button>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Budget</TableHead>
+                  <TableHead>Spent</TableHead>
+                  <TableHead>Remaining</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {finances.map((finance) => (
+                  <TableRow key={finance.id}>
+                    <TableCell className="font-medium">
+                      {finance.category}
+                    </TableCell>
+                    <TableCell>${finance.budget.toLocaleString()}</TableCell>
+                    <TableCell>${finance.spent.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <span
+                        className={
+                          finance.remaining / finance.budget < 0.2
+                            ? "text-red-600 font-medium"
+                            : "text-green-600 font-medium"
+                        }
+                      >
+                        ${finance.remaining.toLocaleString()}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow className="font-bold">
+                  <TableCell>Total</TableCell>
+                  <TableCell>
+                    $
+                    {finances
+                      .reduce((sum, item) => sum + item.budget, 0)
+                      .toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    $
+                    {finances
+                      .reduce((sum, item) => sum + item.spent, 0)
+                      .toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    $
+                    {finances
+                      .reduce((sum, item) => sum + item.remaining, 0)
+                      .toLocaleString()}
+                  </TableCell>
+                  <TableCell></TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="container mx-auto space-y-6">
@@ -124,213 +510,37 @@ export default function ProjectDetails() {
                 <ArrowLeft className="h-4 w-4" />
                 Go Back
               </Button>
-              <Button
-                onClick={() => setShowMapForm(true)}
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Create Map
-              </Button>
             </div>
           </div>
         </CardHeader>
-
-        {/* Project Images */}
-        {project?.data?.imageUrl && project.data.imageUrl.length > 0 && (
-          <CardContent>
-            <div className="flex gap-4 overflow-x-auto pb-4">
-              {project.data.imageUrl.map((image: string, index: number) => (
-                <div key={index} className="flex-shrink-0">
-                  <img
-                    src={image}
-                    alt={`Project Image ${index + 1}`}
-                    className="w-24 h-24 object-cover rounded-lg border-2 border-green-300 shadow-md hover:shadow-lg transition-shadow"
-                  />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        )}
       </Card>
 
+      {/* Navigation Tabs */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5" />
-            Maps ({maps.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {maps.length === 0 ? (
-            <div className="text-center py-12">
-              <Palette className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No maps yet
-              </h3>
-              <p className="text-gray-500 mb-6">
-                Create your first map to start designing your project layout.
-              </p>
+        <CardHeader className="py-3">
+          <div className="flex space-x-1">
+            {tabs.map((tab) => (
               <Button
-                onClick={() => setShowMapForm(true)}
+                key={tab.id}
+                variant={activeTab === tab.id ? "default" : "outline"}
                 className="flex items-center gap-2"
+                onClick={() => setActiveTab(tab.id)}
               >
-                <Plus className="h-4 w-4" />
-                Create First Map
+                {tab.title}
               </Button>
-            </div>
-          ) : (
-            <Table className="border">
-              <TableHeader>
-                <TableRow className="divide-x divide-y">
-                  <TableHead>Map Name</TableHead>
-                  <TableHead>Designer</TableHead>
-                  <TableHead>Assigned To</TableHead>
-                  <TableHead>Background</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Devices</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {maps.map((map) => (
-                  <TableRow key={map._id} className="divide-x divide-y">
-                    <TableCell className="font-medium">{map.name}</TableCell>
-
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          {map.mapDesigner?.name || "Unknown"}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {map.mapDesigner?.email}
-                        </span>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3 text-gray-400" />
-                        <span className="text-sm">
-                          {Array.isArray(map.assignedTo)
-                            ? map.assignedTo.length
-                            : 0}{" "}
-                          user(s)
-                        </span>
-                      </div>
-                      {Array.isArray(map.assignedTo) &&
-                        map.assignedTo.length > 0 && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            {map.assignedTo.slice(0, 2).map((user, idx) => (
-                              <div key={idx}>{user.name}</div>
-                            ))}
-                            {map.assignedTo.length > 2 && (
-                              <div>+{map.assignedTo.length - 2} more</div>
-                            )}
-                          </div>
-                        )}
-                    </TableCell>
-
-                    <TableCell>
-                      {map.bgImageUrl ? (
-                        <img
-                          src={map.bgImageUrl}
-                          alt="Map background"
-                          className="w-12 h-12 object-cover rounded border"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center">
-                          <span className="text-xs text-gray-400">
-                            No image
-                          </span>
-                        </div>
-                      )}
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge variant={map.isComplete ? "default" : "secondary"}>
-                        {map.isComplete ? "Complete" : "In Progress"}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell>
-                      <span className="text-sm text-gray-600">
-                        {Array.isArray(map.availableDevices)
-                          ? map.availableDevices.length
-                          : 0}{" "}
-                        devices
-                      </span>
-                    </TableCell>
-
-                    <TableCell className="text-right">
-                      <div className="flex items-center gap-2 justify-end">
-                        <Button
-                          size="sm"
-                          onClick={() => handleStartDesign(map._id)}
-                          className="flex bg-blue-400 items-center gap-1"
-                        >
-                          <Pen className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => navigate(`/map/${map._id}`)}
-                          className="flex items-center gap-1"
-                        >
-                          <Play className="h-3 w-3" />
-                        </Button>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              className="flex items-center gap-1"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Map</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{map.name}"?
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDeleteMap(map._id)}
-                                disabled={isDeleting}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                {isDeleting ? "Deleting..." : "Delete"}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent>{renderTable()}</CardContent>
       </Card>
 
-      {/* Create Map Form Modal/Overlay */}
+      {/* Create Map Form Dialog */}
       {showMapForm && (
-        <div className="fixed inset-0 bg-black/10 bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <CreateMapForm
-              onSubmit={handleMapSubmit}
-              onCancel={() => setShowMapForm(false)}
-              userId={user?.data?._id}
-              companyId={project?.data?.companyId._id}
-              bgImageUrl={project?.data?.imageUrl}
-            />
-          </div>
-        </div>
+        <CreateMapForm
+          onCancel={showMapHandler}
+          onSubmit={handleMapSubmit}
+          projectId={id || ""}
+        />
       )}
     </div>
   );

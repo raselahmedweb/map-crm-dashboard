@@ -11,9 +11,10 @@ export const baseApi = createApi({
   tagTypes: ["User"],
   endpoints: (builder) => ({
     getUser: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: `/user/all-users`,
         method: "GET",
+        params,
       }),
 
       providesTags: ["User"],
@@ -47,6 +48,14 @@ export const baseApi = createApi({
     updateUser: builder.mutation({
       query: (UserData) => ({
         url: `/user/${UserData._id}`,
+        method: "PATCH",
+        body: UserData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    updateUserByAdmin: builder.mutation({
+      query: (UserData) => ({
+        url: `/user/by-admin/${UserData._id}`,
         method: "PATCH",
         body: UserData,
       }),
@@ -107,6 +116,14 @@ export const baseApi = createApi({
 
       providesTags: ["User"],
     }),
+    getProjectMap: builder.query({
+      query: (id: string) => ({
+        url: `/map/project/${id}`,
+        method: "GET",
+      }),
+
+      providesTags: ["User"],
+    }),
     deleteMap: builder.mutation({
       query: (id) => ({
         url: `/map/${id}`,
@@ -146,6 +163,13 @@ export const baseApi = createApi({
         method: "PATCH",
         body: data,
       }),
+    }),
+    deleteProject: builder.mutation({
+      query: (id) => ({
+        url: `/projects/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
     }),
     createDevice: builder.mutation({
       query: (data) => ({
@@ -216,17 +240,20 @@ export const {
   useLoginUserMutation,
   useDeleteUserMutation,
   useUpdateUserMutation,
+  useUpdateUserByAdminMutation,
   useCreateCustomerMutation,
   useGetAllCustomerQuery,
   useInviteUserMutation,
   useCreateMapMutation,
   useGetAllMapQuery,
   useGetSingleMapQuery,
+  useGetProjectMapQuery,
   useDeleteMapMutation,
   useCreateProjectsMutation,
   useGetProjectsQuery,
   useGetSingleProjectQuery,
   useUpdateProjectsMutation,
+  useDeleteProjectMutation,
   useCreateDeviceMutation,
   useGetDevicesQuery,
   useGetDevicesWithDetailsQuery,

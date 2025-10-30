@@ -11,56 +11,67 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
-import { X, Loader2, Search } from "lucide-react";
 import {
-  useCreateMapMutation,
-  useGetDevicesQuery,
-  useGetUserQuery,
-} from "@/redux/api/baseApi";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-import type { Employee, IDevice } from "@/types/types";
+  X,
+  Loader2,
+  Search,
+  Upload,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { useCreateMapMutation, useGetUserQuery } from "@/redux/api/baseApi";
+import type { Employee } from "@/types/types";
 import { useState, useMemo } from "react";
 
 interface MapFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
-  companyId: string;
-  userId: string;
-  bgImageUrl: string[];
+  projectId: string;
 }
+
+interface ImageUploadState {
+  file: File;
+  preview: string;
+  url?: string;
+  isUploading: boolean;
+  isUploaded: boolean;
+  error?: string;
+}
+
+// Cloudinary upload function
+const uploadToCloudinary = async (file: File): Promise<string> => {
+  const formData = new FormData();
+
+  const CLOUDINARY_UPLOAD_PRESET = "map_images";
+  const CLOUDINARY_CLOUD_NAME = "dprilczgm";
+
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to upload image");
+  }
+
+  const data = await response.json();
+  return data.secure_url;
+};
 
 export default function CreateMapForm({
   onSubmit,
   onCancel,
-  companyId,
-  userId,
-  bgImageUrl,
+  projectId,
 }: MapFormProps) {
-  const [selectedDevices, setSelectedDevices] = useState<IDevice[]>([]);
-  const [deviceSearchTerm, setDeviceSearchTerm] = useState("");
-  const [showDeviceSuggestions, setShowDeviceSuggestions] = useState(false);
-
   const [selectedUsers, setSelectedUsers] = useState<Employee[]>([]);
   const [userSearchTerm, setUserSearchTerm] = useState("");
   const [showUserSuggestions, setShowUserSuggestions] = useState(false);
-
-  const { data: deviceData } = useGetDevicesQuery(
-    {},
-    {
-      pollingInterval: 30000,
-      refetchOnMountOrArgChange: true,
-      refetchOnReconnect: true,
-    }
-  );
-
-  console.log(deviceData, "All Devices Data");
-  const allDevice: IDevice[] = deviceData?.data?.item || [];
 
   const { data: usersData } = useGetUserQuery(
     {},
@@ -76,17 +87,112 @@ export default function CreateMapForm({
   const [createMap, { isLoading: isCreatingMap }] = useCreateMapMutation();
   const form = useForm();
 
-  // Filter devices based on search term and exclude already selected ones
-  const filteredDevices = useMemo(() => {
-    const selectedDeviceIds = selectedDevices.map((device) => device._id);
-    return allDevice
-      .filter(
-        (device) =>
-          !selectedDeviceIds.includes(device._id) &&
-          device.label.toLowerCase().includes(deviceSearchTerm.toLowerCase())
-      )
-      .slice(0, 5); // Limit suggestions to 5 items
-  }, [allDevice, selectedDevices, deviceSearchTerm]);
+  const [image, setImage] = useState<ImageUploadState | null>(null); // Changed to single image
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Clear any existing image
+    if (image) {
+      URL.revokeObjectURL(image.preview);
+    }
+
+    const newImage: ImageUploadState = {
+      file,
+      preview: URL.createObjectURL(file),
+      isUploading: true,
+      isUploaded: false,
+    };
+
+    setImage(newImage);
+
+    try {
+      const url = await uploadToCloudinary(file);
+
+      setImage({
+        ...newImage,
+        url,
+        isUploading: false,
+        isUploaded: true,
+      });
+
+      // Set the form value with the uploaded image URL
+      form.setValue("mapImage", url);
+
+      toast.success("Image uploaded successfully!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+
+      setImage({
+        ...newImage,
+        isUploading: false,
+        isUploaded: false,
+        error: "Upload failed",
+      });
+
+      toast.error("Failed to upload image", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+
+    // Reset input
+    e.target.value = "";
+  };
+
+  const removeImage = () => {
+    if (image) {
+      URL.revokeObjectURL(image.preview);
+      setImage(null);
+      form.setValue("mapImage", "");
+    }
+  };
+
+  const retryUpload = async () => {
+    if (!image || image.isUploading) return;
+
+    setImage({
+      ...image,
+      isUploading: true,
+      error: undefined,
+    });
+
+    try {
+      const url = await uploadToCloudinary(image.file);
+
+      setImage({
+        ...image,
+        url,
+        isUploading: false,
+        isUploaded: true,
+      });
+
+      // Set the form value with the uploaded image URL
+      form.setValue("mapImage", url);
+
+      toast.success("Image uploaded successfully!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error("Retry upload error:", error);
+
+      setImage({
+        ...image,
+        isUploading: false,
+        error: "Upload failed",
+      });
+
+      toast.error("Failed to upload image", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
 
   // Filter users based on search term and exclude already selected ones
   const filteredUsers = useMemo(() => {
@@ -99,33 +205,6 @@ export default function CreateMapForm({
       )
       .slice(0, 5); // Limit suggestions to 5 items
   }, [allUsers, selectedUsers, userSearchTerm]);
-
-  const handleDeviceSelect = (device: IDevice) => {
-    setSelectedDevices((prev) => [...prev, device]);
-    setDeviceSearchTerm("");
-    setShowDeviceSuggestions(false);
-
-    // Update form value with array of device IDs
-    const deviceIds = [...selectedDevices, device].map((d) => d._id);
-    form.setValue("availableDevices", deviceIds);
-  };
-
-  const handleDeviceRemove = (deviceId: string) => {
-    setSelectedDevices((prev) =>
-      prev.filter((device) => device._id !== deviceId)
-    );
-
-    // Update form value
-    const updatedDeviceIds = selectedDevices
-      .filter((device) => device._id !== deviceId)
-      .map((d) => d._id);
-    form.setValue("availableDevices", updatedDeviceIds);
-  };
-
-  const handleDeviceInputChange = (value: string) => {
-    setDeviceSearchTerm(value);
-    setShowDeviceSuggestions(value.length > 0);
-  };
 
   const handleUserSelect = (user: Employee) => {
     setSelectedUsers((prev) => [...prev, user]);
@@ -155,11 +234,9 @@ export default function CreateMapForm({
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
     const formData = {
       name: data.name,
-      companyId,
-      mapDesigner: userId,
-      assignedTo: selectedUsers.map((user) => user._id), // Send array of user IDs
-      bgImageUrl: data.mapImage,
-      availableDevices: selectedDevices.map((device) => device._id), // Send array of device IDs
+      projectId,
+      assignedTo: selectedUsers.map((user) => user._id),
+      bgImageUrl: data.mapImage, // This will now be a single string
     };
 
     try {
@@ -178,8 +255,8 @@ export default function CreateMapForm({
 
       onSubmit(formData);
       form.reset();
-      setSelectedDevices([]);
       setSelectedUsers([]);
+      setImage(null);
     } catch (error) {
       console.error("Failed to create map:", error);
       toast.error("Failed to create map. Please try again.", {
@@ -222,136 +299,6 @@ export default function CreateMapForm({
                       required
                       disabled={isCreatingMap}
                     />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="mapImage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Map</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    defaultValue={field.value || ""}
-                    disabled={isCreatingMap}
-                  >
-                    <FormControl className="w-full z-10">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Map" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {bgImageUrl &&
-                        bgImageUrl.map((img, idx) => (
-                          <SelectItem key={idx} value={(img as string) || ""}>
-                            <div className="flex items-center space-x-2">
-                              <img
-                                src={img}
-                                alt={`Map ${idx + 1}`}
-                                className="w-8 h-8 object-cover rounded"
-                              />
-                              <span>Map {idx + 1}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            {/* Enhanced Multi-Select Device Field */}
-            <FormField
-              control={form.control}
-              name="availableDevices"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Add Devices</FormLabel>
-                  <FormControl>
-                    <div className="space-y-2">
-                      {/* Selected Devices Display */}
-                      {selectedDevices.length > 0 && (
-                        <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-gray-50 min-h-[40px]">
-                          {selectedDevices.map((device) => (
-                            <div
-                              key={device._id}
-                              className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm"
-                            >
-                              <span>{device.label}</span>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleDeviceRemove(device._id as string)
-                                }
-                                className="text-blue-600 hover:text-blue-800 ml-1"
-                                disabled={isCreatingMap}
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Search Input with Suggestions */}
-                      <div className="relative">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                          <Input
-                            placeholder="Search and add devices..."
-                            value={deviceSearchTerm}
-                            onChange={(e) =>
-                              handleDeviceInputChange(e.target.value)
-                            }
-                            onFocus={() =>
-                              setShowDeviceSuggestions(
-                                deviceSearchTerm.length > 0
-                              )
-                            }
-                            className="pl-9"
-                            disabled={isCreatingMap}
-                          />
-                        </div>
-
-                        {/* Suggestions Dropdown */}
-                        {showDeviceSuggestions &&
-                          filteredDevices.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-20 mt-1 max-h-48 overflow-y-auto">
-                              {filteredDevices.map((device) => (
-                                <button
-                                  key={device._id}
-                                  type="button"
-                                  onClick={() => handleDeviceSelect(device)}
-                                  className="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center justify-between group"
-                                  disabled={isCreatingMap}
-                                >
-                                  <span className="text-sm">
-                                    {device.label}
-                                  </span>
-                                  <span className="text-xs text-gray-400 group-hover:text-gray-600">
-                                    Click to add
-                                  </span>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-
-                        {/* No Results Message */}
-                        {showDeviceSuggestions &&
-                          deviceSearchTerm &&
-                          filteredDevices.length === 0 && (
-                            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-20 mt-1">
-                              <div className="px-3 py-2 text-sm text-gray-500">
-                                No devices found matching "{deviceSearchTerm}"
-                              </div>
-                            </div>
-                          )}
-                      </div>
-                    </div>
                   </FormControl>
                 </FormItem>
               )}
@@ -451,6 +398,104 @@ export default function CreateMapForm({
                 </FormItem>
               )}
             />
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Map Image
+              </label>
+
+              {/* Upload Area */}
+              <div className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors rounded-lg">
+                <div className="text-center">
+                  <div className="py-4">
+                    <label htmlFor="image" className="cursor-pointer">
+                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                      <span className="mt-2 block text-sm font-medium text-gray-900">
+                        Upload Map Image
+                      </span>
+                      <span className="mt-1 block text-xs text-gray-500">
+                        PNG, JPG, GIF up to 10MB
+                      </span>
+                      <input
+                        id="image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={isCreatingMap}
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image Preview */}
+              {image && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-gray-700">
+                      Map Image
+                    </h3>
+                  </div>
+
+                  <div className="relative group">
+                    <div className="relative overflow-hidden rounded-lg border-2 border-gray-200">
+                      <img
+                        src={image.preview}
+                        alt="Map preview"
+                        className="w-full h-48 object-contain"
+                      />
+
+                      {/* Upload Status Overlay */}
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        {image.isUploading && (
+                          <div className="text-white text-center">
+                            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-1" />
+                            <span className="text-xs">Uploading...</span>
+                          </div>
+                        )}
+
+                        {image.isUploaded && (
+                          <div className="text-white text-center">
+                            <CheckCircle className="w-6 h-6 mx-auto mb-1 text-green-400" />
+                            <span className="text-xs">Uploaded</span>
+                          </div>
+                        )}
+
+                        {image.error && (
+                          <div className="text-white text-center">
+                            <AlertCircle className="w-6 h-6 mx-auto mb-1 text-red-400" />
+                            <span className="text-xs">Failed</span>
+                            <button
+                              type="button"
+                              onClick={retryUpload}
+                              className="mt-1 text-xs underline hover:no-underline"
+                            >
+                              Retry
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Remove Button */}
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        disabled={image.isUploading}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Image Name */}
+                    <p className="mt-1 text-xs text-gray-500 truncate">
+                      {image.file.name}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="flex space-x-4">
               <Button type="submit" className="flex-1" disabled={isCreatingMap}>
