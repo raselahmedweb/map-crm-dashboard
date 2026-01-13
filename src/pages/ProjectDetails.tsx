@@ -22,7 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  useGetMeQuery,
+  // useGetMeQuery,
   useGetSingleProjectQuery,
   useDeleteMapMutation,
   useGetProjectMapQuery,
@@ -47,14 +47,14 @@ export default function ProjectDetails() {
   const { data: project, isLoading: projectLoading } = useGetSingleProjectQuery(
     id || ""
   );
-  const { data: user } = useGetMeQuery(
-    {},
-    {
-      pollingInterval: 30000,
-      refetchOnMountOrArgChange: true,
-      refetchOnReconnect: true,
-    }
-  );
+  // const { data: user } = useGetMeQuery(
+  //   {},
+  //   {
+  //     pollingInterval: 30000,
+  //     refetchOnMountOrArgChange: true,
+  //     refetchOnReconnect: true,
+  //   }
+  // );
   const { data: mapData, refetch: refetchMaps } = useGetProjectMapQuery(
     id as string,
     {

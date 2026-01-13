@@ -67,6 +67,7 @@ export interface IItemOnMap {
   userId: string;
   salePrice?: number;
   progress?: number;
+  label?: string;
   notes?: string;
   serial?: string;
   mac?: string;
@@ -77,7 +78,7 @@ export interface IItemOnMap {
 }
 
 export interface IMap {
-  _id?: string;
+  _id: string;
   name: string;
   companyId: string;
   mapDesigner: string;
@@ -86,6 +87,7 @@ export interface IMap {
   availableDevices: string[];
   isComplete: boolean;
   customerNotes?: string;
+  createdAt: string;
 }
 
 export interface ICompany {

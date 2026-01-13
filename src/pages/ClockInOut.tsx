@@ -113,7 +113,8 @@ const AttendanceReport: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [sortBy, setSortBy] = useState("Last 7 Days");
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [dateRange, setDateRange] = useState("07/16/2025 - 07/22/2025");
+  // const [dateRange, setDateRange] = useState("07/16/2025 - 07/22/2025");
+  const dateRange = "07/16/2025 - 07/22/2025";
 
   // Filter attendance data
   const filteredData = useMemo(() => {

@@ -717,7 +717,7 @@ import {
   useDeleteItemFromMapMutation,
 } from "@/redux/api/baseApi";
 import type { Employee, IDevice, IItemOnMap } from "@/types/types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import {
   Trash2,
@@ -741,7 +741,10 @@ export default function ProjectDesign() {
     refetchOnMountOrArgChange: true,
     refetchOnReconnect: true,
   });
-  const itemOnMap = placedItemsData?.data?.itemOnMap || [];
+  const itemOnMap = useMemo(
+    () => placedItemsData?.data?.itemOnMap || [],
+    [placedItemsData?.data?.itemOnMap]
+  );
 
   const { data: mapData, isLoading: isMapDataLoading } = useGetSingleMapQuery(
     mapId || "",
@@ -766,7 +769,10 @@ export default function ProjectDesign() {
       refetchOnReconnect: true,
     }
   );
-  const availableDevices: IDevice[] = deviceData?.data?.item || [];
+  const availableDevices: IDevice[] = useMemo(
+    () => deviceData?.data?.item || [],
+    [deviceData?.data?.item]
+  );
 
   const { data, isLoading } = useGetMeQuery(
     {},
@@ -1155,8 +1161,9 @@ export default function ProjectDesign() {
               </div>
 
               {itemsOnMap.map((item, idx) => {
-                const isCompleted = item.progress === 100;
-                const isInProgress = item.progress > 0 && item.progress < 100;
+                const isCompleted = (item.progress ?? 0) === 100;
+                const isInProgress =
+                  (item.progress ?? 0) > 0 && (item.progress ?? 0) < 100;
                 return (
                   <div
                     key={item._id}
@@ -1206,7 +1213,7 @@ export default function ProjectDesign() {
                         }`}
                       ></div>
                       <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover/device:opacity-100 transition-opacity duration-200">
-                        {item.label} {item.location && `• ${item.location}`}
+                        {item.label || "Device"} {item.location && `• ${item.location}`}
                       </div>
                       {isDragging &&
                         draggedItem?._id === item._id &&
@@ -1359,7 +1366,7 @@ export default function ProjectDesign() {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm font-medium">{itemToDelete.label}</p>
+                    <p className="text-sm font-medium">{itemToDelete.label || "Device"}</p>
                     <p className="text-xs">
                       {itemToDelete.location || "No location assigned"}
                     </p>
