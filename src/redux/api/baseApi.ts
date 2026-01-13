@@ -5,7 +5,7 @@ import type { IProjects } from "@/types/types";
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000/api/v1",
+    baseUrl: "https://map-crm-server.onrender.com/api/v1",
     credentials: "include",
   }),
   tagTypes: ["User"],
