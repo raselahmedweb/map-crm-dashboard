@@ -1,5 +1,5 @@
 import App from "@/App";
-import { DashboardLayout } from "@/pages/dashboard";
+// import { DashboardLayout } from "@/pages/dashboard";
 import ErrorPage from "@/pages/error-page";
 // import Home from "@/pages/home";
 import Login from "@/pages/login";
@@ -15,10 +15,10 @@ export const router = createBrowserRouter([
         path: "/",
         Component: Login,
       },
-      {
-        path: "/dashboard",
-        Component: DashboardLayout,
-      },
+      // {
+      //   path: "/dashboard",
+      //   Component: DashboardLayout,
+      // },
     ],
   },
 ]);
