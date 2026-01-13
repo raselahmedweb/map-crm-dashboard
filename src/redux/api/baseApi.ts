@@ -188,7 +188,7 @@ export const baseApi = createApi({
     }),
     getDevicesWithDetails: builder.query({
       query: () => ({
-        url: `/item/all-items-with-details`,
+        url: `/item/all-device-with-details`,
         method: "GET",
       }),
       providesTags: ["User"],

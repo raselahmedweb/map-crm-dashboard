@@ -94,6 +94,9 @@ function Login() {
         />
         <Button type="submit">Login</Button>
       </form>
+      <span className="text-center text-sm text-gray-500">
+        admin / Admin123@
+      </span>
     </Form>
   );
 }

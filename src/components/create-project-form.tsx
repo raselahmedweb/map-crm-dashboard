@@ -46,12 +46,12 @@ export default function CreateProjectForm({
     }
   );
 
-  const companyData: ICompany[] = data?.data?.company;
+  const companyData: ICompany[] = data?.data?.customer;
   const form = useForm();
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
     const formData = {
       name: data.name,
-      companyId: data.companyId,
+      customerId: data.customerId,
       userId: userId,
     };
 

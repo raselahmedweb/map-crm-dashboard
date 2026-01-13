@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
-import { Search, Trash2, AlertTriangle, X } from "lucide-react";
+import { Search, Trash2, AlertTriangle, X, RefreshCcw } from "lucide-react";
 import {
   useGetUserQuery,
   useUpdateUserByAdminMutation,
@@ -19,6 +19,7 @@ const UserRoles: string[] = [
   "CUSTOMER",
 ];
 const EmployeeDashboard: React.FC = () => {
+  const [loadingId, setLoadingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDesignation, setSelectedDesignation] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -119,6 +120,14 @@ const EmployeeDashboard: React.FC = () => {
   const handleDelete = () => {
     updateUser({ _id: editingEmployeeId, isDeleted: true });
     // setEmployees((prev) => prev.filter((emp) => emp._id !== editingEmployeeId));
+  };
+  let isLoadingRestore = false;
+  const handleRestore = (employeeId: string) => {
+    isLoadingRestore = loadingId === employeeId;
+    setTimeout(() => {
+      updateUser({ _id: employeeId, isDeleted: false });
+      setLoadingId(null);
+    }, 500);
   };
 
   if (isLoading) {
@@ -268,12 +277,27 @@ const EmployeeDashboard: React.FC = () => {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(employee._id)}
-                          className="text-red-600 hover:text-red-800 p-1"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {employee.isDeleted ? (
+                          <button
+                            onClick={() => handleRestore(employee._id)}
+                            className={`text-green-600 hover:text-green-800 p-1`}
+                          >
+                            <RefreshCcw
+                              size={16}
+                              // Apply the class directly to the icon
+                              className={`${
+                                isLoadingRestore ? "spin-out" : ""
+                              }`}
+                            />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleEdit(employee._id)}
+                            className="text-red-600 hover:text-red-800 p-1"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

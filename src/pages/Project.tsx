@@ -89,7 +89,7 @@ export default function Projects() {
                   <TableRow className="divide-x divide-y">
                     <TableHead>Name</TableHead>
                     <TableHead>Creator</TableHead>
-                    <TableHead>Company</TableHead>
+                    <TableHead>Owner</TableHead>
                     <TableHead className="w-[150px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>

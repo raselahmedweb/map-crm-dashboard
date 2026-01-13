@@ -30,21 +30,7 @@ import {
 import type { IMap } from "@/types/types";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import {
-  Trash2,
-  Play,
-  Plus,
-  ArrowLeft,
-  Users,
-  Palette,
-  Pen,
-  Cpu,
-  DollarSign,
-  Map,
-  Eye,
-  Edit,
-  MoreHorizontal,
-} from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Palette, Map, Eye, Edit } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function ProjectDetails() {

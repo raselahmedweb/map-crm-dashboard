@@ -11,17 +11,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  useDeleteDeviceMutation,
-  useGetDevicesWithDetailsQuery,
+  useDeleteLabourMutation,
+  useGetLaboursWithDetailsQuery,
 } from "@/redux/api/baseApi";
-import { Building2, Loader2, Trash2 } from "lucide-react";
-import type { IDevice } from "@/types/types";
-import CreateDevice from "@/components/CreateDevice";
+import { Building2, Loader2 } from "lucide-react";
+import type { ILabour } from "@/types/types";
+import CreateLabour from "@/components/CreateLabour";
 
-export default function Device() {
-  const [showDeviceForm, setShowDeviceForm] = useState(false);
+export default function Labour() {
+  const [showLabourForm, setShowLabourForm] = useState(false);
 
-  const { data: deviceData, isLoading } = useGetDevicesWithDetailsQuery(
+  const { data: LabourData, isLoading } = useGetLaboursWithDetailsQuery(
     {},
     {
       pollingInterval: 30000,
@@ -30,14 +30,14 @@ export default function Device() {
     }
   );
 
-  const [deleteDevice] = useDeleteDeviceMutation();
+  const [deleteLabour] = useDeleteLabourMutation();
 
-  const devices: IDevice[] = deviceData?.data?.item || [];
+  const Labours: ILabour[] = LabourData?.data?.item || [];
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="w-8 h-8 animate-spin" />
-        <span className="ml-2">Loading Device...</span>
+        <span className="ml-2">Loading Labour...</span>
       </div>
     );
   }
@@ -45,10 +45,10 @@ export default function Device() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Device Management</h1>
+        <h1 className="text-2xl font-semibold">Labour Management</h1>
         <div className="flex items-center gap-4">
           <Badge variant="outline" className="text-sm">
-            Total: {deviceData.data.total}
+            Total: {LabourData.data.total}
           </Badge>
         </div>
       </div>
@@ -56,14 +56,14 @@ export default function Device() {
       {/* Floor Plans Table */}
       <Card>
         <CardHeader className="flex items-center justify-between px-3">
-          <CardTitle>All Device</CardTitle>
-          <Button onClick={() => setShowDeviceForm(true)}>Add Device</Button>
+          <CardTitle>All Labour</CardTitle>
+          <Button onClick={() => setShowLabourForm(true)}>Add Labour</Button>
         </CardHeader>
         <CardContent>
-          {deviceData.data.total === 0 ? (
+          {LabourData.data.total === 0 ? (
             <div className="text-center py-8">
               <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No Device found</p>
+              <p className="text-gray-500">No Labour found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -79,47 +79,47 @@ export default function Device() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {devices.map((device) => {
+                  {Labours.map((labour) => {
                     return (
-                      <TableRow className="divide-x divide-y" key={device._id}>
+                      <TableRow className="divide-x divide-y" key={labour._id}>
                         <TableCell>
                           <div>
-                            <p className="max-w-xs truncate">{device.label}</p>
+                            <p className="max-w-xs truncate">{labour.label}</p>
                           </div>
                         </TableCell>
 
                         <TableCell>
                           <div>
-                            <p className="max-w-xs truncate">{device.shape}</p>
+                            <p className="max-w-xs truncate">{labour.shape}</p>
                           </div>
                         </TableCell>
 
                         <TableCell>
-                          <div
-                            className={`w-4 h-4 block bg-[${device.color}]`}
-                          ></div>
-                        </TableCell>
-
-                        <TableCell>
-                          <div>
-                            <p className="max-w-xs truncate">{device.price}</p>
+                          <div className="w-4 h-4">
+                            <p className="max-w-xs truncate">{labour.color}</p>
                           </div>
                         </TableCell>
 
                         <TableCell>
                           <div>
-                            <p className="max-w-xs truncate">{device.copies}</p>
+                            <p className="max-w-xs truncate">{labour.price}</p>
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
+                          <div>
+                            <p className="max-w-xs truncate">{labour.copies}</p>
                           </div>
                         </TableCell>
 
                         <TableCell>
                           <div className="flex items-center space-x-2">
                             <Button
-                              onClick={() => deleteDevice(device._id)}
+                              onClick={() => deleteLabour(labour._id)}
                               size="sm"
                               variant="destructive"
                             >
-                              <Trash2 size={16} />
+                              Delete
                             </Button>
                           </div>
                         </TableCell>
@@ -132,10 +132,10 @@ export default function Device() {
           )}
         </CardContent>
       </Card>
-      {showDeviceForm && (
-        <CreateDevice
+      {showLabourForm && (
+        <CreateLabour
           action={{
-            onClick: () => setShowDeviceForm(false),
+            onClick: () => setShowLabourForm(false),
           }}
         />
       )}

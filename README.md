@@ -1,69 +1,120 @@
-# React + TypeScript + Vite
+# Map-Based CRM for Device Installation Management
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+This project is a **Map-Based CRM system** designed to manage and track technical installation tasks across multiple locations and zones.  
+It provides a smart way to assign technicians, plan installations, and monitor project progress using an interactive map interface.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Unlike traditional CRMs, this system focuses on **location-driven task management**, making it ideal for companies that install and maintain physical devices such as **CCTV cameras, telephones, and speaker systems**.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Key Features
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🗺️ Zone-Based Map Interface
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- Visual map with defined zones and locations
+- Each zone represents a physical area (building, floor, campus, or region)
+- Devices are placed and tracked directly on the map
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 🛠️ Technician Task Assignment
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Assign installation tasks to technicians by zone
+- Track task status (Pending, In Progress, Completed)
+- View technician workload and assignments visually
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 📷 Device Installation Management
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Manage different device types:
+  - Cameras
+  - Telephones
+  - Speakers
+- Store installation details for each device
+- Track device location, status, and history
+
+### 🏗️ Project Management
+
+- Create and manage multiple projects
+- Store full project information:
+  - Project name & description
+  - Client/company details
+  - Installation zones and devices
+- Monitor overall project progress
+
+### 💰 Cost & Budget Tracking
+
+- Track project costs from start to finish
+- Maintain records of:
+  - Equipment cost
+  - Labor cost
+  - Total project budget
+- Helps with financial transparency and reporting
+
+### 🏢 Company Information Storage
+
+- Maintain structured company/client profiles
+- Store contact details, addresses, and project history
+- Useful for long-term CRM relationship management
+
+---
+
+## Why This Project Is Unique
+
+- Combines **CRM + Map Visualization**
+- Designed specifically for **field installation businesses**
+- Makes task planning easier by using **real-world locations**
+- Reduces confusion for technicians by providing clear zone-based instructions
+- Scales well for large projects like schools, hospitals, buildings, and campuses
+
+---
+
+## Use Cases
+
+- Security camera installation companies
+- Telecom service providers
+- Public address and speaker system installers
+- Facility management teams
+- Large-scale infrastructure projects
+
+---
+
+## Tech Stack (Example)
+
+> Update this section based on your actual stack
+
+- Frontend: React / Next.js
+- Backend: Node.js / Express
+- Database: MongoDB / PostgreSQL
+- Maps: Google Maps / Mapbox
+- Authentication: Role-based access (Admin, Manager, Technician)
+
+---
+
+## Future Enhancements
+
+- Real-time technician tracking
+- Mobile app for technicians
+- Photo upload after installation
+- Automated reports and invoices
+- Integration with IoT device status monitoring
+
+---
+
+## Status
+
+🚧 **Actively Developed**  
+This project is evolving with new features focused on automation, scalability, and better field operations.
+
+---
+
+## Author
+
+**Rasel Ahmed**  
+Software Developer  
+Map-Based CRM | Field Operations Automation
+
+---
+
+## License
+
+This project is proprietary and intended for internal or commercial use.
